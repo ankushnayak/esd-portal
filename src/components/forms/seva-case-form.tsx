@@ -34,6 +34,10 @@ type CaseValues = {
   consentFiles?: FileList;
 };
 
+function hasDraftEssentials(values: CaseValues) {
+  return Boolean(values.title?.trim() && values.date && values.categoryId);
+}
+
 export function SevaCaseForm({
   categories,
   defaultValues,
@@ -56,6 +60,11 @@ export function SevaCaseForm({
   const publicVisibility = watch("publicVisibility");
 
   const onSubmit = handleSubmit((values) => {
+    if (action === "save-draft" && !hasDraftEssentials(values)) {
+      toast.error("Add at least a title, date, and category before saving a draft.");
+      return;
+    }
+
     const payload = new FormData();
     Object.entries(values).forEach(([key, value]) => {
       if (value == null) return;
@@ -69,16 +78,18 @@ export function SevaCaseForm({
     });
     payload.append("action", action);
 
-    const validationPayload = {
-      ...values,
-      consentAttachmentIds:
-        publicVisibility === PublicVisibility.PUBLIC_WITH_CONSENT && values.consentFiles?.length ? ["pending"] : [],
-    };
-    const parsed = sevaCaseSchema.safeParse(validationPayload);
+    if (action === "submit") {
+      const validationPayload = {
+        ...values,
+        consentAttachmentIds:
+          publicVisibility === PublicVisibility.PUBLIC_WITH_CONSENT && values.consentFiles?.length ? ["pending"] : [],
+      };
+      const parsed = sevaCaseSchema.safeParse(validationPayload);
 
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Unable to save this seva case.");
-      return;
+      if (!parsed.success) {
+        toast.error(parsed.error.issues[0]?.message ?? "Unable to save this seva case.");
+        return;
+      }
     }
 
     startTransition(async () => {
@@ -267,6 +278,9 @@ export function SevaCaseForm({
       </div>
 
       <div className="flex flex-wrap gap-3">
+        <p className="w-full text-sm text-slate-500">
+          Drafts save with the basics. Full details and proof are only required when you submit for review.
+        </p>
         <button
           type="submit"
           disabled={isPending}

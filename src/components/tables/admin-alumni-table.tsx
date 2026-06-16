@@ -1,6 +1,8 @@
 "use client";
 
+import { UserRole, VerificationStatus } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
+import { AdminAlumniActions } from "@/components/admin/admin-alumni-actions";
 import { DataTable } from "@/components/tables/data-table";
 
 export type AdminAlumniRow = {
@@ -9,7 +11,8 @@ export type AdminAlumniRow = {
   email: string;
   city: string;
   profession: string;
-  verificationStatus: string;
+  role: UserRole;
+  verificationStatus: VerificationStatus;
 };
 
 const columns: ColumnDef<AdminAlumniRow>[] = [
@@ -20,13 +23,14 @@ const columns: ColumnDef<AdminAlumniRow>[] = [
   { accessorKey: "verificationStatus", header: "Verification" },
   {
     id: "actions",
-    header: "Queue",
-    cell: ({ row }) =>
-      row.original.verificationStatus === "VERIFIED" ? (
-        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Verified</span>
-      ) : (
-        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">Needs review</span>
-      ),
+    header: "Access",
+    cell: ({ row }) => (
+      <AdminAlumniActions
+        userId={row.original.id}
+        initialRole={row.original.role}
+        initialVerificationStatus={row.original.verificationStatus}
+      />
+    ),
   },
 ];
 

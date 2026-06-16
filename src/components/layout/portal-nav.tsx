@@ -14,7 +14,7 @@ export function PortalNav({ items, title }: { items: NavItem[]; title: string })
       <p className="px-3 pb-3 text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">{title}</p>
       <div className="flex flex-col gap-1">
         {items.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               key={item.href}

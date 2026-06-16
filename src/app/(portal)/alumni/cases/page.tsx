@@ -30,7 +30,7 @@ export default async function AlumniCasesPage() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-500">
               <tr>
-                {["Case", "Category", "Date", "Status", "Review notes"].map((header) => (
+                {["Case", "Category", "Date", "Status", "Review notes", "Action"].map((header) => (
                   <th key={header} className="px-4 py-3 font-medium">
                     {header}
                   </th>
@@ -45,6 +45,11 @@ export default async function AlumniCasesPage() {
                   <td className="px-4 py-3 text-slate-600">{formatDate(item.date)}</td>
                   <td className="px-4 py-3 text-slate-600">{item.status.replaceAll("_", " ")}</td>
                   <td className="px-4 py-3 text-slate-600">{item.clarificationNotes ?? item.rejectionReason ?? "No comments yet"}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/alumni/cases/${item.id}`} className="text-sm font-semibold text-blue-900 hover:text-blue-700">
+                      {item.status === "DRAFT" ? "Continue draft" : "View or edit"}
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

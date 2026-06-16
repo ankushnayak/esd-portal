@@ -1,12 +1,15 @@
 import { PageSection } from "@/components/layout/page-section";
+import { getPlatformSettings } from "@/lib/settings";
 
-export default function ParticipatePage() {
+export default async function ParticipatePage() {
+  const settings = await getPlatformSettings();
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
       <PageSection
         eyebrow="How to participate"
         title="Join the monthly Expert Seva Diwas movement"
-        description="The program is designed to make participation easy for busy professionals while keeping every public metric trustworthy."
+        description={`The program is designed to make participation easy for busy professionals while keeping every public metric trustworthy. The current seva rhythm is ${settings.sevaDayLabel}.`}
       >
         <div className="grid gap-5">
           {[

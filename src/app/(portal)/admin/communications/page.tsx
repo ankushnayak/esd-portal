@@ -15,6 +15,10 @@ export default async function AdminCommunicationsPage() {
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">Communication center</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Templates, email relay, and WhatsApp logs</h1>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+          Use this page to confirm that templates exist and to monitor whether outbound messages are being logged as dry
+          runs or real deliveries.
+        </p>
       </div>
       <div className="grid gap-4 xl:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -31,7 +35,7 @@ export default async function AdminCommunicationsPage() {
             <div className="mt-4">
               <EmptyState
                 title="No message templates yet"
-                description="Create email or WhatsApp templates to standardize outreach from the admin portal."
+                description="Run the initial seed or add templates in the database so the portal can send consistent alumni updates."
               />
             </div>
           )}
@@ -50,7 +54,7 @@ export default async function AdminCommunicationsPage() {
             <div className="mt-4">
               <EmptyState
                 title="No notification logs yet"
-                description="Sent emails and WhatsApp messages will start appearing here once the first delivery is triggered."
+                description="The first welcome email, reminder, or certificate notification will appear here after a delivery or dry run is triggered."
               />
             </div>
           )}

@@ -1,8 +1,13 @@
+import { UserRole } from "@prisma/client";
+import { requireRole } from "@/lib/auth/session";
 import { AdminAlumniTable, type AdminAlumniRow } from "@/components/tables/admin-alumni-table";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function AdminAlumniPage() {
+  await requireRole(UserRole.CITY_COORDINATOR);
+
   const rows = await prisma.user.findMany({
+    where: { alumniProfile: { isNot: null } },
     include: { alumniProfile: true },
     orderBy: { createdAt: "desc" },
   });
@@ -13,6 +18,7 @@ export default async function AdminAlumniPage() {
     email: row.email,
     city: row.alumniProfile?.city ?? "-",
     profession: row.alumniProfile?.profession ?? "-",
+    role: row.role,
     verificationStatus: row.alumniProfile?.verificationStatus ?? "PENDING",
   }));
 

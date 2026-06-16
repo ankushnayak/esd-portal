@@ -97,27 +97,41 @@ export async function updateUserVerificationAction(input: {
   });
 
   revalidatePath("/admin/alumni");
+  revalidatePath("/alumni");
 
   return { success: true, message: "Alumni verification updated." };
 }
 
 export async function updateSettingsAction(input: { publicDashboardEnabled: boolean; sevaDayLabel: string }) {
   const session = await requireRole(UserRole.SUPER_ADMIN);
+  const existing = await prisma.setting.findUnique({
+    where: { key: "platform" },
+    select: { valueJson: true },
+  });
+  const currentValue =
+    existing && typeof existing.valueJson === "object" && existing.valueJson ? existing.valueJson : {};
+  const nextValue = {
+    ...currentValue,
+    publicDashboardEnabled: input.publicDashboardEnabled,
+    sevaDayLabel: input.sevaDayLabel,
+  };
 
   await prisma.setting.upsert({
     where: { key: "platform" },
     create: {
       key: "platform",
-      valueJson: input,
+      valueJson: nextValue,
       updatedById: session.user.id,
     },
     update: {
-      valueJson: input,
+      valueJson: nextValue,
       updatedById: session.user.id,
     },
   });
 
   revalidatePath("/admin/settings");
+  revalidatePath("/dashboard");
+  revalidatePath("/participate");
 
   return { success: true, message: "Settings updated." };
 }

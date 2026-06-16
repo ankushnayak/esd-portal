@@ -5,6 +5,7 @@ import { canSubmitCases } from "@/lib/auth/roles";
 import { getCurrentSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { persistUpload, sanitizeText } from "@/lib/uploads/storage";
+import { sevaCaseSchema } from "@/lib/validation/case";
 
 function boolValue(value: FormDataEntryValue | null) {
   return value === "true" || value === "on";
@@ -17,20 +18,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message: "Authentication required." }, { status: 401 });
   }
 
+  const formData = await request.formData();
+  const action = String(formData.get("action") ?? "save-draft");
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: { alumniProfile: true },
   });
 
-  if (!user || !canSubmitCases(user.role, user.alumniProfile?.verificationStatus)) {
+  if (!user) {
+    return NextResponse.json({ success: false, message: "User account not found." }, { status: 404 });
+  }
+
+  if (action === "submit" && !canSubmitCases(user.role, user.alumniProfile?.verificationStatus)) {
     return NextResponse.json(
-      { success: false, message: "Only verified alumni can submit seva cases." },
+      { success: false, message: "Only verified alumni can submit seva cases for review." },
       { status: 403 },
     );
   }
 
-  const formData = await request.formData();
-  const action = String(formData.get("action") ?? "save-draft");
   const caseId = formData.get("caseId")?.toString() || undefined;
   const proofFiles = formData.getAll("proofFiles").filter((value): value is File => value instanceof File && value.size > 0);
   const consentFiles = formData
@@ -46,6 +51,53 @@ export async function POST(request: Request) {
 
   const publicVisibility = (formData.get("publicVisibility")?.toString() ?? "PRIVATE") as PublicVisibility;
   const consentObtained = boolValue(formData.get("consentObtained"));
+  const isDraft = action !== "submit";
+
+  const rawValues = {
+    caseId,
+    title: sanitizeText(formData.get("title")?.toString()),
+    date: formData.get("date")?.toString() ?? new Date().toISOString(),
+    categoryId: formData.get("categoryId")?.toString() ?? "",
+    subcategoryId: formData.get("subcategoryId")?.toString() || null,
+    profession: sanitizeText(formData.get("profession")?.toString()) || (isDraft ? "To be added" : ""),
+    city: sanitizeText(formData.get("city")?.toString()) || (isDraft ? "To be added" : ""),
+    state: sanitizeText(formData.get("state")?.toString()) || (isDraft ? "To be added" : ""),
+    beneficiaryType: formData.get("beneficiaryType")?.toString() ?? "INDIVIDUAL",
+    beneficiaryName: sanitizeText(formData.get("beneficiaryName")?.toString()),
+    beneficiaryContact: sanitizeText(formData.get("beneficiaryContact")?.toString()),
+    beneficiaryLocation: sanitizeText(formData.get("beneficiaryLocation")?.toString()),
+    beneficiaryNotes: sanitizeText(formData.get("beneficiaryNotes")?.toString()),
+    beneficiaryCount: Number(formData.get("beneficiaryCount") ?? (isDraft ? 1 : 0)),
+    description: sanitizeText(formData.get("description")?.toString()) || (isDraft ? "Draft in progress." : ""),
+    estimatedValue: Number(formData.get("estimatedValue") ?? 0),
+    actualAmount: Number(formData.get("actualAmount") ?? 0),
+    currency: sanitizeText(formData.get("currency")?.toString() ?? "INR"),
+    consentObtained,
+    publicVisibility,
+    publicSummary: sanitizeText(formData.get("publicSummary")?.toString()),
+    internalNotes: sanitizeText(formData.get("internalNotes")?.toString()),
+    action,
+    attachmentIds: proofFiles.length ? ["pending"] : [],
+    consentAttachmentIds: consentFiles.length ? ["pending"] : [],
+  };
+
+  if (isDraft && (!rawValues.title || !rawValues.categoryId || !formData.get("date")?.toString())) {
+    return NextResponse.json(
+      { success: false, message: "Drafts need a title, date, and category before they can be saved." },
+      { status: 400 },
+    );
+  }
+
+  if (!isDraft) {
+    const parsed = sevaCaseSchema.safeParse(rawValues);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, message: parsed.error.issues[0]?.message ?? "Unable to submit this seva case." },
+        { status: 400 },
+      );
+    }
+  }
 
   if (publicVisibility === PublicVisibility.PUBLIC_WITH_CONSENT && (!consentObtained || consentFiles.length === 0)) {
     return NextResponse.json(
@@ -55,20 +107,29 @@ export async function POST(request: Request) {
   }
 
   const status = action === "submit" ? SevaCaseStatus.SUBMITTED : SevaCaseStatus.DRAFT;
-  const uploads = await Promise.all([
-    ...proofFiles.map((file) => persistUpload(file, AttachmentType.PROOF)),
-    ...consentFiles.map((file) => persistUpload(file, AttachmentType.CONSENT)),
-  ]);
+  let uploads: Awaited<ReturnType<typeof persistUpload>>[] = [];
+
+  try {
+    uploads = await Promise.all([
+      ...proofFiles.map((file) => persistUpload(file, AttachmentType.PROOF)),
+      ...consentFiles.map((file) => persistUpload(file, AttachmentType.CONSENT)),
+    ]);
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: error instanceof Error ? error.message : "Unable to upload one or more files." },
+      { status: 400 },
+    );
+  }
 
   const data = {
-    title: sanitizeText(formData.get("title")?.toString()),
-    date: new Date(formData.get("date")?.toString() ?? new Date().toISOString()),
-    categoryId: formData.get("categoryId")?.toString() ?? "",
-    subcategoryId: formData.get("subcategoryId")?.toString() || null,
-    profession: sanitizeText(formData.get("profession")?.toString()),
-    city: sanitizeText(formData.get("city")?.toString()),
-    state: sanitizeText(formData.get("state")?.toString()),
-    beneficiaryType: (formData.get("beneficiaryType")?.toString() ?? "INDIVIDUAL") as
+    title: rawValues.title,
+    date: new Date(rawValues.date),
+    categoryId: rawValues.categoryId,
+    subcategoryId: rawValues.subcategoryId,
+    profession: rawValues.profession,
+    city: rawValues.city,
+    state: rawValues.state,
+    beneficiaryType: rawValues.beneficiaryType as
       | "INDIVIDUAL"
       | "FAMILY"
       | "SCHOOL"
@@ -76,29 +137,40 @@ export async function POST(request: Request) {
       | "COMMUNITY"
       | "NGO"
       | "OTHER",
-    beneficiaryCount: Number(formData.get("beneficiaryCount") ?? 1),
-    description: sanitizeText(formData.get("description")?.toString()),
-    estimatedValue: Number(formData.get("estimatedValue") ?? 0),
-    actualAmount: Number(formData.get("actualAmount") ?? 0),
-    currency: sanitizeText(formData.get("currency")?.toString() ?? "INR"),
+    beneficiaryCount: rawValues.beneficiaryCount,
+    description: rawValues.description,
+    estimatedValue: rawValues.estimatedValue,
+    actualAmount: rawValues.actualAmount,
+    currency: rawValues.currency,
     consentObtained,
     publicVisibility,
-    publicSummary: sanitizeText(formData.get("publicSummary")?.toString()),
-    internalNotes: sanitizeText(formData.get("internalNotes")?.toString()),
+    publicSummary: rawValues.publicSummary,
+    internalNotes: rawValues.internalNotes,
     status,
     submittedAt: action === "submit" ? new Date() : null,
   };
 
   const beneficiaryPrivateData = {
-    name: sanitizeText(formData.get("beneficiaryName")?.toString()),
-    contact: sanitizeText(formData.get("beneficiaryContact")?.toString()),
-    location: sanitizeText(formData.get("beneficiaryLocation")?.toString()),
-    notes: sanitizeText(formData.get("beneficiaryNotes")?.toString()),
+    name: rawValues.beneficiaryName,
+    contact: rawValues.beneficiaryContact,
+    location: rawValues.beneficiaryLocation,
+    notes: rawValues.beneficiaryNotes,
   };
 
-  const savedCase = caseId
+  const existingCase = caseId
+    ? await prisma.sevaCase.findFirst({
+        where: { id: caseId, userId: session.user.id, deletedAt: null },
+        select: { id: true },
+      })
+    : null;
+
+  if (caseId && !existingCase) {
+    return NextResponse.json({ success: false, message: "Seva case not found." }, { status: 404 });
+  }
+
+  const savedCase = existingCase
     ? await prisma.sevaCase.update({
-        where: { id: caseId, userId: session.user.id },
+        where: { id: existingCase.id },
         data: {
           ...data,
           privateData: {

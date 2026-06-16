@@ -3,8 +3,10 @@ import { BreakdownBarChart, SharePieChart, TrendChart } from "@/components/chart
 import { PageSection } from "@/components/layout/page-section";
 import { StatCard } from "@/components/app/stat-card";
 import { getPublicDashboardData } from "@/lib/dashboard/queries";
+import { getPlatformSettings } from "@/lib/settings";
 
 export default async function PublicDashboardPage() {
+  const settings = await getPlatformSettings();
   const data = await getPublicDashboardData();
 
   return (
@@ -22,7 +24,12 @@ export default async function PublicDashboardPage() {
         </div>
       </PageSection>
 
-      {data.summary.totalCases > 0 ? (
+      {!settings.publicDashboardEnabled ? (
+        <EmptyState
+          title="Public dashboard is temporarily unavailable"
+          description="The alumni team has paused public reporting for maintenance. Please check back soon."
+        />
+      ) : data.summary.totalCases > 0 ? (
         <section className="rounded-[2rem] border border-slate-200/80 bg-white/70 p-4 shadow-sm shadow-slate-200/60 backdrop-blur-sm sm:p-5 lg:p-6">
           <div className="mb-6 max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-800">Impact analysis</p>
