@@ -1,0 +1,14 @@
+.git
+.gitignore
+.next
+coverage
+node_modules
+.env
+.env.*
+backups
+demo-screenshots
+pitch-deck-shots
+storage
+*.log
+.DS_Store
+*.pem
