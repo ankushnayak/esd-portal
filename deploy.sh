@@ -8,7 +8,6 @@ if [ "${1:-}" = "--bootstrap" ]; then
 fi
 
 echo "==> Expert Seva Diwas deployment started"
-git pull --ff-only || true
 
 echo "==> Building application image"
 docker compose build app

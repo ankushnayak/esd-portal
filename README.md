@@ -69,12 +69,13 @@ Expert Seva Diwas is a production-oriented alumni seva tracking portal for the E
    - `DEFAULT_ADMIN_PASSWORD=` a strong temporary password
    - SMTP and WATI values only when you are ready to enable those integrations
 9. Run `chmod +x deploy.sh backup.sh restore.sh`.
-10. For the first production deploy, run `./deploy.sh --bootstrap`.
-11. Wait for Caddy to issue the TLS certificate for `esd.expertedu.co.in`.
-12. Verify `https://esd.expertedu.co.in` and `https://esd.expertedu.co.in/api/health`.
-13. Sign in with the initial admin credentials from `.env`, rotate that password, and add the real operating admins.
-14. Keep PostgreSQL on the same host by continuing to use the `postgres` Docker service from `docker-compose.yml`.
-15. Schedule backups:
+10. Pull the latest code with `git pull origin main`.
+11. For the first production deploy, run `./deploy.sh --bootstrap`.
+12. Wait for Caddy to issue the TLS certificate for `esd.expertedu.co.in`.
+13. Verify `https://esd.expertedu.co.in` and `https://esd.expertedu.co.in/api/health`.
+14. Sign in with the initial admin credentials from `.env`, rotate that password, and add the real operating admins.
+15. Keep PostgreSQL on the same host by continuing to use the `postgres` Docker service from `docker-compose.yml`.
+16. Schedule backups:
    - database dumps with `./backup.sh`
    - EBS snapshots
    - backups of `storage/uploads` if uploaded files matter operationally
@@ -82,7 +83,7 @@ Expert Seva Diwas is a production-oriented alumni seva tracking portal for the E
 ### Operational notes
 
 - Use `./deploy.sh --bootstrap` only for the first deployment or when you intentionally want to refresh baseline records.
-- Use `./deploy.sh` for routine code updates.
+- Use `git pull origin main && ./deploy.sh` for routine code updates.
 - The bootstrap seed no longer inserts demo alumni, demo cases, demo stories, badges, certificates, or fake impact metrics.
 - Caddy now reads `APP_DOMAIN`, so the same config works for localhost and production.
 - If usage grows beyond a light-to-moderate workload, move PostgreSQL off the app instance before scaling the web tier horizontally.
