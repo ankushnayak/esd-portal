@@ -42,3 +42,7 @@ export function isOperationalUser(role: UserRole) {
 export function isActiveUser(status: UserStatus) {
   return status === UserStatus.ACTIVE;
 }
+
+export function getPostLoginPath(role: UserRole) {
+  return isOperationalUser(role) ? "/admin" : "/alumni";
+}

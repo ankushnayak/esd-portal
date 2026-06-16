@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { getPostLoginPath } from "@/lib/auth/roles";
 import { loginSchema } from "@/lib/validation/auth";
 
 type LoginValues = {
@@ -40,8 +41,11 @@ export function LoginForm() {
         return;
       }
 
+      const session = await getSession();
+      const destination = session?.user?.role ? getPostLoginPath(session.user.role) : "/alumni";
+
       toast.success("Signed in successfully.");
-      router.push("/alumni");
+      router.push(destination);
       router.refresh();
     });
   });

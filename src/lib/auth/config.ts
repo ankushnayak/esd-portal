@@ -9,7 +9,7 @@ import { loginSchema } from "@/lib/validation/auth";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   pages: {
     signIn: "/login",
@@ -57,18 +57,53 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      const profile = await prisma.alumniProfile.findUnique({
-        where: { userId: user.id },
-        select: { verificationStatus: true },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.role = user.role ?? UserRole.PENDING_ALUMNI;
+        token.status = user.status ?? UserStatus.ACTIVE;
+        token.verificationStatus = user.verificationStatus ?? VerificationStatus.PENDING;
+        token.cityScope = user.cityScope ?? [];
+        token.categoryScopeIds = user.categoryScopeIds ?? [];
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      if (!session.user || !token.sub) {
+        return session;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: token.sub },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          cityScope: true,
+          categoryScopeIds: true,
+          alumniProfile: {
+            select: {
+              verificationStatus: true,
+            },
+          },
+        },
       });
 
+      if (!user) {
+        return session;
+      }
+
       session.user.id = user.id;
-      session.user.role = user.role ?? UserRole.PENDING_ALUMNI;
-      session.user.status = user.status ?? UserStatus.ACTIVE;
-      session.user.verificationStatus = profile?.verificationStatus ?? VerificationStatus.PENDING;
-      session.user.cityScope = user.cityScope ?? [];
-      session.user.categoryScopeIds = user.categoryScopeIds ?? [];
+      session.user.name = user.name;
+      session.user.email = user.email;
+      session.user.role = user.role;
+      session.user.status = user.status;
+      session.user.verificationStatus = user.alumniProfile?.verificationStatus ?? VerificationStatus.PENDING;
+      session.user.cityScope = user.cityScope;
+      session.user.categoryScopeIds = user.categoryScopeIds;
 
       return session;
     },

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { UserRole, UserStatus, VerificationStatus } from "@prisma/client";
-import { canReviewCase, canSubmitCases, hasRole, isActiveUser } from "@/lib/auth/roles";
+import { canReviewCase, canSubmitCases, getPostLoginPath, hasRole, isActiveUser } from "@/lib/auth/roles";
 
 describe("role permissions", () => {
   it("permits verified alumni to submit cases", () => {
@@ -17,5 +17,11 @@ describe("role permissions", () => {
   it("recognizes only active users as active", () => {
     expect(isActiveUser(UserStatus.ACTIVE)).toBe(true);
     expect(isActiveUser(UserStatus.SUSPENDED)).toBe(false);
+  });
+
+  it("routes admins and reviewers to the admin console after login", () => {
+    expect(getPostLoginPath(UserRole.SUPER_ADMIN)).toBe("/admin");
+    expect(getPostLoginPath(UserRole.VOLUNTEER_REVIEWER)).toBe("/admin");
+    expect(getPostLoginPath(UserRole.VERIFIED_ALUMNI)).toBe("/alumni");
   });
 });
