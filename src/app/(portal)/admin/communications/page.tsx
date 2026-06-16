@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/app/empty-state";
 import { prisma } from "@/lib/db/prisma";
 
 export default async function AdminCommunicationsPage() {
@@ -18,23 +19,41 @@ export default async function AdminCommunicationsPage() {
       <div className="grid gap-4 xl:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-slate-950">Message templates</h2>
-          <div className="mt-4 space-y-3">
-            {templates.map((template) => (
-              <div key={template.id} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                {template.name} ({template.channel})
-              </div>
-            ))}
-          </div>
+          {templates.length ? (
+            <div className="mt-4 space-y-3">
+              {templates.map((template) => (
+                <div key={template.id} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  {template.name} ({template.channel})
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <EmptyState
+                title="No message templates yet"
+                description="Create email or WhatsApp templates to standardize outreach from the admin portal."
+              />
+            </div>
+          )}
         </div>
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-slate-950">Recent notification logs</h2>
-          <div className="mt-4 space-y-3">
-            {notifications.map((notification) => (
-              <div key={notification.id} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                {notification.channel} to {notification.recipient} | {notification.status}
-              </div>
-            ))}
-          </div>
+          {notifications.length ? (
+            <div className="mt-4 space-y-3">
+              {notifications.map((notification) => (
+                <div key={notification.id} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  {notification.channel} to {notification.recipient} | {notification.status}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <EmptyState
+                title="No notification logs yet"
+                description="Sent emails and WhatsApp messages will start appearing here once the first delivery is triggered."
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
