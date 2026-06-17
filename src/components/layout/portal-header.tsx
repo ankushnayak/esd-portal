@@ -28,13 +28,13 @@ export function PortalHeader({
   switchLabel?: string;
 }) {
   return (
-    <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <div className="surface-card-muted mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Logo />
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">{roleLabels[role]}</span>
-            <span className={`rounded-full px-3 py-1 font-medium ${verificationTone(verificationStatus)}`}>
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700 shadow-sm">{roleLabels[role]}</span>
+            <span className={`rounded-full px-3 py-1 font-medium shadow-sm ${verificationTone(verificationStatus)}`}>
               {verificationStatus.replaceAll("_", " ")}
             </span>
           </div>
@@ -42,7 +42,7 @@ export function PortalHeader({
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/"
-            className="inline-flex h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+            className="inline-flex h-10 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
           >
             Public site
           </Link>
@@ -54,7 +54,7 @@ export function PortalHeader({
               {switchLabel}
             </Link>
           ) : null}
-          <SignOutButton className="inline-flex h-10 items-center justify-center rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50" />
+          <SignOutButton className="inline-flex h-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] px-4 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-50" />
         </div>
       </div>
     </header>

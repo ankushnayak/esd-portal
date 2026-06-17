@@ -22,7 +22,8 @@ type StateOption = {
   name: string;
 };
 
-const fieldClassName = "w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-700";
+const fieldClassName =
+  "w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-700 focus:bg-white";
 
 async function fetchLocationOptions<T>(path: string) {
   const response = await fetch(path, { cache: "no-store" });
@@ -179,12 +180,20 @@ export function RegisterForm() {
   });
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2">
+    <form onSubmit={onSubmit} className="surface-card grid gap-5 p-6 sm:grid-cols-2 sm:p-8">
+      <div className="sm:col-span-2">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">Registration details</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-950">Set up your verified alumni profile</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          Clear and complete profile details help reviewers verify accounts faster and keep the platform easy to search,
+          report on, and manage.
+        </p>
+      </div>
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="name">
           Full name
         </label>
-        <input id="name" autoComplete="name" className={fieldClassName} {...register("name")} />
+        <input id="name" autoComplete="name" placeholder="Enter your full name" className={fieldClassName} {...register("name")} />
         {errors.name ? <p className="mt-2 text-sm text-rose-600">{errors.name.message}</p> : null}
       </div>
 
@@ -192,7 +201,7 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="email">
           Email
         </label>
-        <input id="email" type="email" autoComplete="email" className={fieldClassName} {...register("email")} />
+        <input id="email" type="email" autoComplete="email" placeholder="name@example.com" className={fieldClassName} {...register("email")} />
         {errors.email ? <p className="mt-2 text-sm text-rose-600">{errors.email.message}</p> : null}
       </div>
 
@@ -200,7 +209,14 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="password">
           Password
         </label>
-        <input id="password" type="password" autoComplete="new-password" className={fieldClassName} {...register("password")} />
+        <input
+          id="password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Create a secure password"
+          className={fieldClassName}
+          {...register("password")}
+        />
         {errors.password ? <p className="mt-2 text-sm text-rose-600">{errors.password.message}</p> : null}
       </div>
 
@@ -212,9 +228,11 @@ export function RegisterForm() {
           id="confirmPassword"
           type="password"
           autoComplete="new-password"
+          placeholder="Re-enter your password"
           className={fieldClassName}
           {...register("confirmPassword")}
         />
+        <p className="mt-2 text-xs text-slate-500">This helps prevent typo-based lockouts during sign-up.</p>
         {errors.confirmPassword ? <p className="mt-2 text-sm text-rose-600">{errors.confirmPassword.message}</p> : null}
       </div>
 
@@ -225,7 +243,7 @@ export function RegisterForm() {
         <div className="flex gap-3">
           <select
             aria-label="Country code"
-            className="w-32 rounded-2xl border border-slate-300 px-3 py-3 outline-none transition focus:border-blue-700"
+            className="w-32 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3 text-slate-950 outline-none transition focus:border-blue-700 focus:bg-white"
             {...register("phoneCountryCode")}
           >
             {countries.map((country) => (
@@ -244,6 +262,7 @@ export function RegisterForm() {
             {...register("phone")}
           />
         </div>
+        <p className="mt-2 text-xs text-slate-500">Use the number you actively use for review follow-ups and approvals.</p>
         {errors.phoneCountryCode ? <p className="mt-2 text-sm text-rose-600">{errors.phoneCountryCode.message}</p> : null}
         {errors.phone ? <p className="mt-2 text-sm text-rose-600">{errors.phone.message}</p> : null}
       </div>
@@ -294,6 +313,7 @@ export function RegisterForm() {
             <option key={profession} value={profession} />
           ))}
         </datalist>
+        <p className="mt-2 text-xs text-slate-500">Choose the closest profession, or select Other to describe it in your own words.</p>
         {errors.professionOption ? <p className="mt-2 text-sm text-rose-600">{errors.professionOption.message}</p> : null}
       </div>
 
@@ -302,7 +322,7 @@ export function RegisterForm() {
           <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="professionOther">
             Tell us your profession
           </label>
-          <input id="professionOther" className={fieldClassName} {...register("professionOther")} />
+          <input id="professionOther" placeholder="Example: Health policy advisor" className={fieldClassName} {...register("professionOther")} />
           {errors.professionOther ? <p className="mt-2 text-sm text-rose-600">{errors.professionOther.message}</p> : null}
         </div>
       ) : (
@@ -388,7 +408,7 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full rounded-2xl bg-blue-950 px-4 py-3 font-semibold text-white transition hover:bg-blue-900 disabled:opacity-50"
+          className="w-full rounded-2xl bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] px-4 py-3 font-semibold text-white shadow-[0_20px_40px_-24px_rgba(29,78,216,0.85)] transition hover:brightness-105 disabled:opacity-50"
         >
           {isPending ? "Registering..." : "Register as Alumni"}
         </button>

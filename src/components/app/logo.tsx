@@ -10,7 +10,7 @@ export function Logo() {
         alt={`${appMetadata.shortBrand} logo`}
         width={52}
         height={52}
-        className="size-10 rounded-2xl bg-white object-contain p-1 shadow-sm ring-1 ring-slate-200 sm:size-12"
+        className="size-10 rounded-2xl bg-white object-contain p-1 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.5)] ring-1 ring-slate-200/80 sm:size-12"
       />
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-[11px] font-semibold tracking-[0.24em] text-slate-500 sm:text-sm">EXPERT Alumni</span>

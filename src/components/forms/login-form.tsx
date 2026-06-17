@@ -51,7 +51,12 @@ export function LoginForm() {
   });
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <form onSubmit={onSubmit} className="surface-card space-y-5 p-6 sm:p-8">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">Sign in</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-950">Access your alumni workspace</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Use the email and password linked to your Expert alumni profile.</p>
+      </div>
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="email">
           Email
@@ -59,7 +64,8 @@ export function LoginForm() {
         <input
           id="email"
           type="email"
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none ring-0 transition focus:border-blue-700"
+          autoComplete="email"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-950 outline-none ring-0 transition placeholder:text-slate-400 focus:border-blue-700 focus:bg-white"
           {...register("email")}
         />
       </div>
@@ -70,7 +76,8 @@ export function LoginForm() {
         <input
           id="password"
           type="password"
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none ring-0 transition focus:border-blue-700"
+          autoComplete="current-password"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-950 outline-none ring-0 transition placeholder:text-slate-400 focus:border-blue-700 focus:bg-white"
           {...register("password")}
         />
       </div>
@@ -78,7 +85,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-2xl bg-blue-950 px-4 py-3 font-semibold text-white transition hover:bg-blue-900 disabled:opacity-50"
+        className="w-full rounded-2xl bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] px-4 py-3 font-semibold text-white shadow-[0_18px_34px_-20px_rgba(29,78,216,0.8)] transition hover:brightness-105 disabled:opacity-50"
       >
         {isPending ? "Signing in..." : "Sign in"}
       </button>
