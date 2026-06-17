@@ -1,23 +1,64 @@
 import { z } from "zod";
+import { expertCompletionStartYear, professionOptions } from "@/lib/alumni-registration";
 
-export const registerSchema = z.object({
-  name: z.string().trim().min(2).max(120),
-  email: z.email().transform((value) => value.toLowerCase()),
-  password: z
-    .string()
-    .min(8)
-    .max(72)
-    .regex(/[A-Z]/, "Password must include an uppercase letter")
-    .regex(/[a-z]/, "Password must include a lowercase letter")
-    .regex(/[0-9]/, "Password must include a number"),
-  phone: z.string().trim().min(8).max(20),
-  batchYear: z.coerce.number().min(1950).max(2100),
-  institution: z.string().trim().min(2).max(120),
-  program: z.string().trim().min(2).max(120),
-  profession: z.string().trim().min(2).max(120),
-  city: z.string().trim().min(2).max(120),
-  state: z.string().trim().min(2).max(120),
-});
+const currentYear = new Date().getFullYear();
+
+export const registerSchema = z
+  .object({
+    name: z.string().trim().min(2).max(120),
+    email: z.email().transform((value) => value.toLowerCase()),
+    password: z
+      .string()
+      .min(8)
+      .max(72)
+      .regex(/[A-Z]/, "Password must include an uppercase letter")
+      .regex(/[a-z]/, "Password must include a lowercase letter")
+      .regex(/[0-9]/, "Password must include a number"),
+    confirmPassword: z.string().min(8).max(72),
+    phoneCountryCode: z.string().trim().regex(/^\+\d{1,4}$/, "Select a valid country code."),
+    phone: z.string().trim().regex(/^[0-9][0-9\s-]{5,19}$/, "Enter a valid mobile / WhatsApp number."),
+    batchYear: z.coerce
+      .number()
+      .int()
+      .min(expertCompletionStartYear, `Year of completion must be ${expertCompletionStartYear} or later.`)
+      .max(currentYear, "Year of completion cannot be in the future."),
+    institution: z.string().trim().min(2).max(120),
+    professionOption: z.enum(professionOptions),
+    professionOther: z.string().trim().max(120).optional().or(z.literal("")),
+    countryIso: z.string().trim().length(2, "Select a valid country."),
+    stateCode: z.string().trim().min(1, "Select a valid state."),
+    city: z.string().trim().min(2).max(120),
+  })
+  .superRefine((value, context) => {
+    if (value.password !== value.confirmPassword) {
+      context.addIssue({
+        code: "custom",
+        path: ["confirmPassword"],
+        message: "Passwords do not match.",
+      });
+    }
+
+    if (value.professionOption === "Other" && !value.professionOther?.trim()) {
+      context.addIssue({
+        code: "custom",
+        path: ["professionOther"],
+        message: "Please tell us your profession.",
+      });
+    }
+  })
+  .transform((value) => ({
+    name: value.name,
+    email: value.email,
+    password: value.password,
+    phoneCountryCode: value.phoneCountryCode,
+    phone: value.phone.replace(/[^\d]/g, ""),
+    batchYear: value.batchYear,
+    institution: value.institution,
+    profession: value.professionOption === "Other" ? (value.professionOther ?? "").trim() : value.professionOption,
+    countryIso: value.countryIso,
+    stateCode: value.stateCode,
+    city: value.city,
+  }));
 
 export const loginSchema = z.object({
   email: z.email().transform((value) => value.toLowerCase()),

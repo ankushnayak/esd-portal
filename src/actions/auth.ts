@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { Country, State } from "country-state-city";
 import { UserRole, VerificationStatus } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit/log";
 import { prisma } from "@/lib/db/prisma";
@@ -23,6 +24,13 @@ export async function registerAlumniAction(payload: unknown) {
     return { success: false, message: "An account with this email already exists." };
   }
 
+  const country = Country.getCountryByCode(parsed.data.countryIso);
+  const state = State.getStatesOfCountry(parsed.data.countryIso).find((item) => item.isoCode === parsed.data.stateCode);
+
+  if (!country || !state) {
+    return { success: false, message: "Please select a valid country and state." };
+  }
+
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
 
   const user = await prisma.user.create({
@@ -30,17 +38,17 @@ export async function registerAlumniAction(payload: unknown) {
       email: parsed.data.email,
       passwordHash,
       name: parsed.data.name,
-      phone: parsed.data.phone,
+      phone: `${parsed.data.phoneCountryCode} ${parsed.data.phone}`,
       role: UserRole.PENDING_ALUMNI,
       emailVerifiedAt: new Date(),
       alumniProfile: {
         create: {
           batchYear: parsed.data.batchYear,
           institution: parsed.data.institution,
-          program: parsed.data.program,
           profession: parsed.data.profession,
           city: parsed.data.city,
-          state: parsed.data.state,
+          state: state.name,
+          country: country.name,
           verificationStatus: VerificationStatus.PENDING,
         },
       },
