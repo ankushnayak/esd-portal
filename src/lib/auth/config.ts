@@ -4,6 +4,7 @@ import { UserRole, UserStatus, VerificationStatus } from "@prisma/client";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db/prisma";
+import { getDisplayVerificationStatus } from "@/lib/auth/roles";
 import { loginSchema } from "@/lib/validation/auth";
 
 export const authOptions: NextAuthOptions = {
@@ -49,7 +50,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           status: user.status,
-          verificationStatus: user.alumniProfile?.verificationStatus ?? VerificationStatus.PENDING,
+          verificationStatus: getDisplayVerificationStatus(user.role, user.alumniProfile?.verificationStatus),
           cityScope: user.cityScope,
           categoryScopeIds: user.categoryScopeIds,
         };
@@ -101,7 +102,7 @@ export const authOptions: NextAuthOptions = {
       session.user.email = user.email;
       session.user.role = user.role;
       session.user.status = user.status;
-      session.user.verificationStatus = user.alumniProfile?.verificationStatus ?? VerificationStatus.PENDING;
+      session.user.verificationStatus = getDisplayVerificationStatus(user.role, user.alumniProfile?.verificationStatus);
       session.user.cityScope = user.cityScope;
       session.user.categoryScopeIds = user.categoryScopeIds;
 

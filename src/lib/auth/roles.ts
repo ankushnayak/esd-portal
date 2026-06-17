@@ -26,6 +26,14 @@ export function canSubmitCases(role: UserRole, verificationStatus?: Verification
   return role !== UserRole.PENDING_ALUMNI && verificationStatus === VerificationStatus.VERIFIED;
 }
 
+export function getDisplayVerificationStatus(role: UserRole, verificationStatus?: VerificationStatus | null) {
+  if (isOperationalUser(role)) {
+    return VerificationStatus.VERIFIED;
+  }
+
+  return verificationStatus ?? VerificationStatus.PENDING;
+}
+
 export function canReviewCase(role: UserRole) {
   return ([
     UserRole.VOLUNTEER_REVIEWER,

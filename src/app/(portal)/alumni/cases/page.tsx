@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SevaCaseStatus } from "@prisma/client";
 import { formatDate } from "@/lib/utils/format";
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -47,7 +48,11 @@ export default async function AlumniCasesPage() {
                   <td className="px-4 py-3 text-slate-600">{item.clarificationNotes ?? item.rejectionReason ?? "No comments yet"}</td>
                   <td className="px-4 py-3">
                     <Link href={`/alumni/cases/${item.id}`} className="text-sm font-semibold text-blue-900 hover:text-blue-700">
-                      {item.status === "DRAFT" ? "Continue draft" : "View or edit"}
+                      {item.status === SevaCaseStatus.DRAFT
+                        ? "Continue draft"
+                        : item.status === SevaCaseStatus.CLARIFICATION_REQUESTED
+                          ? "Review and resubmit"
+                          : "View details"}
                     </Link>
                   </td>
                 </tr>
