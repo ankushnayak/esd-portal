@@ -331,32 +331,39 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="countryIso">
           Country
         </label>
-        <select
-          id="countryIso"
-          className={fieldClassName}
-          {...register("countryIso", {
-            onChange: (event) => {
-              const nextCountryIso = String(event.target.value ?? "");
-              if (nextCountryIso === selectedCountryIso) {
-                return;
-              }
+        <Controller
+          name="countryIso"
+          control={control}
+          render={({ field }) => (
+            <select
+              id="countryIso"
+              className={fieldClassName}
+              value={field.value || ""}
+              onChange={(event) => {
+                const nextCountryIso = String(event.target.value ?? "");
+                field.onChange(nextCountryIso);
 
-              setLoadingStates(Boolean(nextCountryIso));
-              setLoadingCities(false);
-              setStates([]);
-              setCities([]);
-              setValue("stateCode", "", { shouldDirty: true });
-              setValue("city", "", { shouldDirty: true });
-            },
-          })}
-        >
-          <option value="">Select country</option>
-          {countries.map((country) => (
-            <option key={country.isoCode} value={country.isoCode}>
-              {country.name}
-            </option>
-          ))}
-        </select>
+                if (nextCountryIso === selectedCountryIso) {
+                  return;
+                }
+
+                setLoadingStates(Boolean(nextCountryIso));
+                setLoadingCities(false);
+                setStates([]);
+                setCities([]);
+                setValue("stateCode", "", { shouldDirty: true });
+                setValue("city", "", { shouldDirty: true });
+              }}
+            >
+              <option value="">Select country</option>
+              {countries.map((country) => (
+                <option key={country.isoCode} value={country.isoCode}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+          )}
+        />
         {errors.countryIso ? <p className="mt-2 text-sm text-rose-600">{errors.countryIso.message}</p> : null}
       </div>
 
@@ -364,30 +371,37 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="stateCode">
           State
         </label>
-        <select
-          id="stateCode"
-          disabled={!selectedCountryIso || loadingStates}
-          className={`${fieldClassName} disabled:bg-slate-100 disabled:text-slate-500`}
-          {...register("stateCode", {
-            onChange: (event) => {
-              const nextStateCode = String(event.target.value ?? "");
-              if (nextStateCode === selectedStateCode) {
-                return;
-              }
+        <Controller
+          name="stateCode"
+          control={control}
+          render={({ field }) => (
+            <select
+              id="stateCode"
+              disabled={!selectedCountryIso || loadingStates}
+              className={`${fieldClassName} disabled:bg-slate-100 disabled:text-slate-500`}
+              value={field.value || ""}
+              onChange={(event) => {
+                const nextStateCode = String(event.target.value ?? "");
+                field.onChange(nextStateCode);
 
-              setLoadingCities(Boolean(nextStateCode));
-              setCities([]);
-              setValue("city", "", { shouldDirty: true });
-            },
-          })}
-        >
-          <option value="">{loadingStates ? "Loading states..." : "Select state"}</option>
-          {states.map((state) => (
-            <option key={state.isoCode} value={state.isoCode}>
-              {state.name}
-            </option>
-          ))}
-        </select>
+                if (nextStateCode === selectedStateCode) {
+                  return;
+                }
+
+                setLoadingCities(Boolean(nextStateCode));
+                setCities([]);
+                setValue("city", "", { shouldDirty: true });
+              }}
+            >
+              <option value="">{loadingStates ? "Loading states..." : "Select state"}</option>
+              {states.map((state) => (
+                <option key={state.isoCode} value={state.isoCode}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          )}
+        />
         {errors.stateCode ? <p className="mt-2 text-sm text-rose-600">{errors.stateCode.message}</p> : null}
       </div>
 
