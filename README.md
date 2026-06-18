@@ -24,6 +24,12 @@ Expert Seva Diwas is a production-oriented alumni seva tracking portal for the E
 4. Start Postgres and the app with `docker compose up --build`.
 5. Run Prisma migrations with `docker compose run --rm app npm run prisma:migrate`.
 6. Bootstrap baseline records with `docker compose run --rm app npm run prisma:seed`.
+
+### Tooling note
+
+- Regenerate `package-lock.json` with Node 20 and npm 10.8.2 to match the production Docker build.
+- The repo includes `.nvmrc` and `package.json#packageManager` for that reason.
+- Avoid running `npm install` directly on the production checkout. Let Docker consume the committed lockfile with `npm ci`.
 7. Open [http://localhost](http://localhost).
 
 ## Initial admin login
