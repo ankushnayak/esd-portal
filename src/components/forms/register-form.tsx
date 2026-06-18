@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,6 +25,16 @@ type StateOption = {
 
 const fieldClassName =
   "w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-700 focus:bg-white";
+const selectClassName = `${fieldClassName} appearance-none pr-12`;
+
+function SelectShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      {children}
+      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+    </div>
+  );
+}
 
 async function fetchLocationOptions<T>(path: string) {
   const response = await fetch(path, { cache: "no-store" });
@@ -269,14 +280,16 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="batchYear">
           Year of Completion at EXPERT
         </label>
-        <select id="batchYear" className={fieldClassName} {...register("batchYear", { valueAsNumber: true })}>
-          <option value="">Select year</option>
-          {expertCompletionYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+        <SelectShell>
+          <select id="batchYear" className={selectClassName} {...register("batchYear", { valueAsNumber: true })}>
+            <option value="">Select year</option>
+            {expertCompletionYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </SelectShell>
         {errors.batchYear ? <p className="mt-2 text-sm text-rose-600">{errors.batchYear.message}</p> : null}
       </div>
 
@@ -284,14 +297,16 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="institution">
           Institution
         </label>
-        <select id="institution" className={fieldClassName} {...register("institution")}>
-          <option value="">Select institution</option>
-          {institutionOptions.map((institution) => (
-            <option key={institution} value={institution}>
-              {institution}
-            </option>
-          ))}
-        </select>
+        <SelectShell>
+          <select id="institution" className={selectClassName} {...register("institution")}>
+            <option value="">Select institution</option>
+            {institutionOptions.map((institution) => (
+              <option key={institution} value={institution}>
+                {institution}
+              </option>
+            ))}
+          </select>
+        </SelectShell>
         {errors.institution ? <p className="mt-2 text-sm text-rose-600">{errors.institution.message}</p> : null}
       </div>
 
@@ -335,33 +350,35 @@ export function RegisterForm() {
           name="countryIso"
           control={control}
           render={({ field }) => (
-            <select
-              id="countryIso"
-              className={fieldClassName}
-              value={field.value || ""}
-              onChange={(event) => {
-                const nextCountryIso = String(event.target.value ?? "");
-                field.onChange(nextCountryIso);
+            <SelectShell>
+              <select
+                id="countryIso"
+                className={selectClassName}
+                value={field.value || ""}
+                onChange={(event) => {
+                  const nextCountryIso = String(event.target.value ?? "");
+                  field.onChange(nextCountryIso);
 
-                if (nextCountryIso === selectedCountryIso) {
-                  return;
-                }
+                  if (nextCountryIso === selectedCountryIso) {
+                    return;
+                  }
 
-                setLoadingStates(Boolean(nextCountryIso));
-                setLoadingCities(false);
-                setStates([]);
-                setCities([]);
-                setValue("stateCode", "", { shouldDirty: true });
-                setValue("city", "", { shouldDirty: true });
-              }}
-            >
-              <option value="">Select country</option>
-              {countries.map((country) => (
-                <option key={country.isoCode} value={country.isoCode}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
+                  setLoadingStates(Boolean(nextCountryIso));
+                  setLoadingCities(false);
+                  setStates([]);
+                  setCities([]);
+                  setValue("stateCode", "", { shouldDirty: true });
+                  setValue("city", "", { shouldDirty: true });
+                }}
+              >
+                <option value="">Select country</option>
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </SelectShell>
           )}
         />
         {errors.countryIso ? <p className="mt-2 text-sm text-rose-600">{errors.countryIso.message}</p> : null}
@@ -375,31 +392,33 @@ export function RegisterForm() {
           name="stateCode"
           control={control}
           render={({ field }) => (
-            <select
-              id="stateCode"
-              disabled={!selectedCountryIso || loadingStates}
-              className={`${fieldClassName} disabled:bg-slate-100 disabled:text-slate-500`}
-              value={field.value || ""}
-              onChange={(event) => {
-                const nextStateCode = String(event.target.value ?? "");
-                field.onChange(nextStateCode);
+            <SelectShell>
+              <select
+                id="stateCode"
+                disabled={!selectedCountryIso || loadingStates}
+                className={`${selectClassName} disabled:bg-slate-100 disabled:text-slate-500`}
+                value={field.value || ""}
+                onChange={(event) => {
+                  const nextStateCode = String(event.target.value ?? "");
+                  field.onChange(nextStateCode);
 
-                if (nextStateCode === selectedStateCode) {
-                  return;
-                }
+                  if (nextStateCode === selectedStateCode) {
+                    return;
+                  }
 
-                setLoadingCities(Boolean(nextStateCode));
-                setCities([]);
-                setValue("city", "", { shouldDirty: true });
-              }}
-            >
-              <option value="">{loadingStates ? "Loading states..." : "Select state"}</option>
-              {states.map((state) => (
-                <option key={state.isoCode} value={state.isoCode}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+                  setLoadingCities(Boolean(nextStateCode));
+                  setCities([]);
+                  setValue("city", "", { shouldDirty: true });
+                }}
+              >
+                <option value="">{loadingStates ? "Loading states..." : "Select state"}</option>
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.isoCode}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+            </SelectShell>
           )}
         />
         {errors.stateCode ? <p className="mt-2 text-sm text-rose-600">{errors.stateCode.message}</p> : null}
