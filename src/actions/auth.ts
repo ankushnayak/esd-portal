@@ -38,7 +38,7 @@ export async function registerAlumniAction(payload: unknown) {
       email: parsed.data.email,
       passwordHash,
       name: parsed.data.name,
-      phone: `${parsed.data.phoneCountryCode} ${parsed.data.phone}`,
+      phone: parsed.data.phone,
       role: UserRole.PENDING_ALUMNI,
       emailVerifiedAt: new Date(),
       alumniProfile: {

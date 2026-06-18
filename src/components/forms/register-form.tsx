@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
+import PhoneInput from "react-phone-number-input";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { registerAlumniAction } from "@/actions/auth";
@@ -14,7 +15,6 @@ type RegisterValues = z.input<typeof registerSchema>;
 type CountryOption = {
   isoCode: string;
   name: string;
-  phoneCode: string;
 };
 
 type StateOption = {
@@ -54,7 +54,7 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterValues>({
     defaultValues: {
-      phoneCountryCode: "+91",
+      phone: "",
       countryIso: "IN",
       stateCode: "",
       professionOption: undefined,
@@ -72,11 +72,6 @@ export function RegisterForm() {
       .then((options) => {
         if (ignore) return;
         setCountries(options);
-
-        const selectedCountry = options.find((item) => item.isoCode === getValues("countryIso"));
-        if (selectedCountry && !getValues("phoneCountryCode")) {
-          setValue("phoneCountryCode", selectedCountry.phoneCode, { shouldDirty: false });
-        }
       })
       .catch(() => {
         if (!ignore) {
@@ -87,7 +82,7 @@ export function RegisterForm() {
     return () => {
       ignore = true;
     };
-  }, [getValues, setValue]);
+  }, []);
 
   useEffect(() => {
     if (!selectedCountryIso) return;
@@ -166,12 +161,14 @@ export function RegisterForm() {
       }
 
       reset({
-        phoneCountryCode: "+91",
+        phone: "",
         countryIso: "IN",
         stateCode: "",
         city: "",
         professionOption: undefined,
       });
+      setLoadingStates(true);
+      setLoadingCities(false);
       setStates([]);
       setCities([]);
       toast.success(result.message);
@@ -240,30 +237,31 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="phone">
           Mobile / WhatsApp
         </label>
-        <div className="flex gap-3">
-          <select
-            aria-label="Country code"
-            className="w-32 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3 text-slate-950 outline-none transition focus:border-blue-700 focus:bg-white"
-            {...register("phoneCountryCode")}
-          >
-            {countries.map((country) => (
-              <option key={`${country.isoCode}-${country.phoneCode}`} value={country.phoneCode}>
-                {country.phoneCode}
-              </option>
-            ))}
-          </select>
-          <input
-            id="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            placeholder="Enter mobile number"
-            className={fieldClassName}
-            {...register("phone")}
-          />
-        </div>
+        <Controller
+          name="phone"
+          control={control}
+          render={({ field }) => (
+            <PhoneInput
+              id="phone"
+              international
+              defaultCountry="IN"
+              countryCallingCodeEditable={false}
+              autoComplete="tel"
+              placeholder="+91 98765 43210"
+              className="phone-input"
+              countrySelectProps={{ "aria-label": "Phone country" }}
+              numberInputProps={{
+                id: "phone",
+                className: "phone-input__field",
+                autoComplete: "tel",
+              }}
+              value={field.value || undefined}
+              onBlur={field.onBlur}
+              onChange={(value) => field.onChange(value ?? "")}
+            />
+          )}
+        />
         <p className="mt-2 text-xs text-slate-500">Use the number you actively use for review follow-ups and approvals.</p>
-        {errors.phoneCountryCode ? <p className="mt-2 text-sm text-rose-600">{errors.phoneCountryCode.message}</p> : null}
         {errors.phone ? <p className="mt-2 text-sm text-rose-600">{errors.phone.message}</p> : null}
       </div>
 
@@ -337,8 +335,13 @@ export function RegisterForm() {
           id="countryIso"
           className={fieldClassName}
           {...register("countryIso", {
-            onChange: () => {
-              setLoadingStates(true);
+            onChange: (event) => {
+              const nextCountryIso = String(event.target.value ?? "");
+              if (nextCountryIso === selectedCountryIso) {
+                return;
+              }
+
+              setLoadingStates(Boolean(nextCountryIso));
               setLoadingCities(false);
               setStates([]);
               setCities([]);
@@ -366,8 +369,13 @@ export function RegisterForm() {
           disabled={!selectedCountryIso || loadingStates}
           className={`${fieldClassName} disabled:bg-slate-100 disabled:text-slate-500`}
           {...register("stateCode", {
-            onChange: () => {
-              setLoadingCities(true);
+            onChange: (event) => {
+              const nextStateCode = String(event.target.value ?? "");
+              if (nextStateCode === selectedStateCode) {
+                return;
+              }
+
+              setLoadingCities(Boolean(nextStateCode));
               setCities([]);
               setValue("city", "", { shouldDirty: true });
             },

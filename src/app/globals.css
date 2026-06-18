@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "react-phone-number-input/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -157,5 +158,25 @@
 
   .section-chip {
     @apply inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-emerald-800;
+  }
+
+  .phone-input {
+    @apply flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 transition focus-within:border-blue-700 focus-within:bg-white;
+  }
+
+  .phone-input__field {
+    @apply min-w-0 flex-1 border-0 bg-transparent p-0 text-slate-950 outline-none ring-0 placeholder:text-slate-400 focus:ring-0;
+  }
+
+  .phone-input .PhoneInputCountry {
+    @apply mr-0 flex items-center gap-2;
+  }
+
+  .phone-input .PhoneInputCountrySelect {
+    @apply rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm text-slate-950 outline-none transition focus:border-blue-700;
+  }
+
+  .phone-input .PhoneInputCountryIcon {
+    @apply shadow-none;
   }
 }

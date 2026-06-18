@@ -1,3 +1,4 @@
+import { isValidPhoneNumber, parsePhoneNumberFromString } from "libphonenumber-js/min";
 import { z } from "zod";
 import { expertCompletionStartYear, professionOptions } from "@/lib/alumni-registration";
 
@@ -15,8 +16,7 @@ export const registerSchema = z
       .regex(/[a-z]/, "Password must include a lowercase letter")
       .regex(/[0-9]/, "Password must include a number"),
     confirmPassword: z.string().min(8).max(72),
-    phoneCountryCode: z.string().trim().regex(/^\+\d{1,4}$/, "Select a valid country code."),
-    phone: z.string().trim().regex(/^[0-9][0-9\s-]{5,19}$/, "Enter a valid mobile / WhatsApp number."),
+    phone: z.string().trim().refine((value) => isValidPhoneNumber(value), "Enter a valid mobile / WhatsApp number."),
     batchYear: z.coerce
       .number()
       .int()
@@ -50,8 +50,7 @@ export const registerSchema = z
     name: value.name,
     email: value.email,
     password: value.password,
-    phoneCountryCode: value.phoneCountryCode,
-    phone: value.phone.replace(/[^\d]/g, ""),
+    phone: parsePhoneNumberFromString(value.phone)?.number ?? value.phone,
     batchYear: value.batchYear,
     institution: value.institution,
     profession: value.professionOption === "Other" ? (value.professionOther ?? "").trim() : value.professionOption,

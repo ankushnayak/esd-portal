@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { LoginForm } from "@/components/forms/login-form";
 
 const loginHighlights: { icon: LucideIcon; title: string; description: string }[] = [
@@ -26,6 +26,13 @@ export default function LoginPage() {
       <section className="surface-card relative overflow-hidden bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,64,175,0.92)_45%,rgba(5,150,105,0.88))] p-8 text-white sm:p-10 lg:p-12">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_28%)]" />
         <div className="relative">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/15 hover:text-white"
+          >
+            <ArrowLeft className="size-4" />
+            Back to homepage
+          </Link>
           <p className="section-chip border-white/15 bg-white/10 text-emerald-100">Expert Seva Diwas</p>
           <h1 className="mt-5 max-w-2xl text-4xl font-semibold text-white sm:text-5xl">Welcome back, alumni.</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-blue-50/90 sm:text-lg">

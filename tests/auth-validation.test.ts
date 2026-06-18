@@ -8,8 +8,7 @@ describe("registerSchema", () => {
       email: "test@example.com",
       password: "Password1",
       confirmPassword: "Password2",
-      phoneCountryCode: "+91",
-      phone: "9876543210",
+      phone: "+919876543210",
       batchYear: 2010,
       institution: "Expert Coaching Classes",
       professionOption: "Doctor",
@@ -28,8 +27,7 @@ describe("registerSchema", () => {
       email: "test@example.com",
       password: "Password1",
       confirmPassword: "Password1",
-      phoneCountryCode: "+91",
-      phone: "9876543210",
+      phone: "+919876543210",
       batchYear: 2010,
       institution: "Expert Coaching Classes",
       professionOption: "Other",
@@ -42,14 +40,13 @@ describe("registerSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("normalizes the chosen profession and phone number", () => {
+  it("normalizes the chosen profession and preserves international phone format", () => {
     const result = registerSchema.safeParse({
       name: "Test Alumni",
       email: "TEST@EXAMPLE.COM",
       password: "Password1",
       confirmPassword: "Password1",
-      phoneCountryCode: "+91",
-      phone: "98765 43210",
+      phone: "+91 98765 43210",
       batchYear: 2010,
       institution: "Expert Coaching Classes",
       professionOption: "Other",
@@ -63,7 +60,7 @@ describe("registerSchema", () => {
 
     if (result.success) {
       expect(result.data.email).toBe("test@example.com");
-      expect(result.data.phone).toBe("9876543210");
+      expect(result.data.phone).toBe("+919876543210");
       expect(result.data.profession).toBe("Aviation Consultant");
     }
   });
